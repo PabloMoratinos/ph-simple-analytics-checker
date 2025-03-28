@@ -51,6 +51,22 @@ const AnalyticsChecker: React.FC = () => {
             detected={analyticsData.ga4.detected}
             ids={analyticsData.ga4.ids}
           />
+          
+          <AnalyticsCard
+            title="Adobe Analytics"
+            description="Seguimiento y análisis web"
+            isLoading={analyticsData.isLoading}
+            detected={analyticsData.adobe.detected}
+            ids={analyticsData.adobe.ids}
+          />
+          
+          <AnalyticsCard
+            title="Amplitude"
+            description="Analítica de comportamiento"
+            isLoading={analyticsData.isLoading}
+            detected={analyticsData.amplitude.detected}
+            ids={analyticsData.amplitude.ids}
+          />
         </div>
       </div>
       

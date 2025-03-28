@@ -11,6 +11,14 @@ export interface AnalyticsData {
     detected: boolean;
     ids: string[];
   };
+  adobe: {
+    detected: boolean;
+    ids: string[];
+  };
+  amplitude: {
+    detected: boolean;
+    ids: string[];
+  };
   isLoading: boolean;
 }
 
@@ -18,6 +26,8 @@ export const useAnalyticsDetection = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
     gtm: { detected: false, ids: [] },
     ga4: { detected: false, ids: [] },
+    adobe: { detected: false, ids: [] },
+    amplitude: { detected: false, ids: [] },
     isLoading: false
   });
 
@@ -30,6 +40,32 @@ export const useAnalyticsDetection = () => {
     // Look for G-XXXXXXXX measurement IDs
     const ga4Regex = /G-[A-Z0-9]{8,10}/g;
     return [...new Set(html.match(ga4Regex) || [])];
+  };
+
+  const extractAdobeIds = (html: string): string[] => {
+    // Look for Adobe Analytics Report Suite IDs and Experience Cloud IDs
+    const adobeRsidRegex = /s\.account\s*=\s*["']([A-Z0-9,]+)["']/g;
+    const adobeEcidRegex = /MCMID\|(\d+)/g;
+    const adobeLaunchRegex = /launch-[A-Za-z0-9]{8,}/g;
+    
+    // Extract and merge all matches
+    const rsidMatches = Array.from(html.matchAll(/s\.account\s*=\s*["']([A-Z0-9,]+)["']/g), m => m[1]);
+    const ecidMatches = Array.from(html.matchAll(/MCMID\|(\d+)/g), m => m[1]);
+    const launchMatches = html.match(adobeLaunchRegex) || [];
+    
+    return [...new Set([...rsidMatches, ...ecidMatches, ...launchMatches])];
+  };
+
+  const extractAmplitudeIds = (html: string): string[] => {
+    // Look for Amplitude API Keys
+    const amplitudeRegex = /amplitude\.init\(\s*["']([A-Za-z0-9]{32})["']/g;
+    const amplitudeApiKeyRegex = /apiKey\s*[:=]\s*["']([A-Za-z0-9]{32})["']/g;
+    
+    // Extract and merge all matches
+    const initMatches = Array.from(html.matchAll(amplitudeRegex), m => m[1]);
+    const apiKeyMatches = Array.from(html.matchAll(amplitudeApiKeyRegex), m => m[1]);
+    
+    return [...new Set([...initMatches, ...apiKeyMatches])];
   };
 
   const getCurrentTab = async (): Promise<string> => {
@@ -72,16 +108,22 @@ export const useAnalyticsDetection = () => {
         const html = results[0].result as string;
         console.log("HTML retrieved, length:", html.length);
         
-        // Extract GTM and GA4 IDs
+        // Extract analytics IDs
         const gtmIds = extractGTMIds(html);
         const ga4Ids = extractGA4Ids(html);
+        const adobeIds = extractAdobeIds(html);
+        const amplitudeIds = extractAmplitudeIds(html);
         
         console.log("GTM IDs found:", gtmIds);
         console.log("GA4 IDs found:", ga4Ids);
+        console.log("Adobe IDs found:", adobeIds);
+        console.log("Amplitude IDs found:", amplitudeIds);
         
         setAnalyticsData({
           gtm: { detected: gtmIds.length > 0, ids: gtmIds },
           ga4: { detected: ga4Ids.length > 0, ids: ga4Ids },
+          adobe: { detected: adobeIds.length > 0, ids: adobeIds },
+          amplitude: { detected: amplitudeIds.length > 0, ids: amplitudeIds },
           isLoading: false
         });
         
@@ -92,6 +134,8 @@ export const useAnalyticsDetection = () => {
         setTimeout(() => {
           const hasGTM = Math.random() > 0.3;
           const hasGA4 = Math.random() > 0.3;
+          const hasAdobe = Math.random() > 0.3;
+          const hasAmplitude = Math.random() > 0.3;
           
           const gtmIds = hasGTM ? Array.from({ length: Math.floor(Math.random() * 2) + 1 }, 
             (_, i) => `GTM-${Math.random().toString(36).substring(2, 9).toUpperCase()}`) : [];
@@ -99,9 +143,17 @@ export const useAnalyticsDetection = () => {
           const ga4Ids = hasGA4 ? Array.from({ length: Math.floor(Math.random() * 2) + 1 }, 
             (_, i) => `G-${Math.random().toString(36).substring(2, 10).toUpperCase()}`) : [];
           
+          const adobeIds = hasAdobe ? Array.from({ length: Math.floor(Math.random() * 2) + 1 }, 
+            (_, i) => `${Math.random() > 0.5 ? 'launch-' : ''}${Math.random().toString(36).substring(2, 10).toUpperCase()}`) : [];
+          
+          const amplitudeIds = hasAmplitude ? Array.from({ length: Math.floor(Math.random() * 2) + 1 }, 
+            (_, i) => `${Array.from({ length: 32 }, () => Math.random().toString(36)[2]).join('').toUpperCase()}`) : [];
+          
           setAnalyticsData({
             gtm: { detected: hasGTM, ids: gtmIds },
             ga4: { detected: hasGA4, ids: ga4Ids },
+            adobe: { detected: hasAdobe, ids: adobeIds },
+            amplitude: { detected: hasAmplitude, ids: amplitudeIds },
             isLoading: false
           });
           
