@@ -22,14 +22,7 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({
   detected, 
   ids 
 }) => {
-  const [isOpen, setIsOpen] = React.useState(detected);
-
-  // Update open state when detected status changes
-  React.useEffect(() => {
-    if (detected) {
-      setIsOpen(true);
-    }
-  }, [detected]);
+  const [isOpen, setIsOpen] = React.useState(false);
 
   return (
     <Card className={cn(
