@@ -26,7 +26,7 @@ const AnalyticsChecker: React.FC = () => {
   }, [analyticsData.isLoading, analyticsData.gtm.ids.length]);
 
   return (
-    <div className="flex flex-col h-screen bg-analytics-blue-light">
+    <div className="flex flex-col h-screen bg-[#8e8e90]">
       <Header />
       
       <div className="p-4 flex-1 overflow-auto">
