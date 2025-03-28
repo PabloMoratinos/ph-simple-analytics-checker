@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for detecting Amplitude implementations
  */
@@ -9,6 +8,7 @@
  * @returns Array of detected Amplitude API keys
  */
 export const extractAmplitudeIds = (html: string): string[] => {
+  // Original code for static detection - we'll keep this as a fallback
   // Improved Amplitude detection patterns
   const patterns = [
     // Standard amplitude.init pattern with API key
@@ -55,4 +55,37 @@ export const extractAmplitudeIds = (html: string): string[] => {
   
   // Filter out false positives - ensure they match Amplitude API key format
   return uniqueMatches.filter(key => /^[A-Za-z0-9]{32}$/.test(key));
+};
+
+/**
+ * Check if Amplitude is being used by examining network requests
+ * This function should be called from a content script
+ * @returns Promise that resolves to true if Amplitude is detected, false otherwise
+ */
+export const detectAmplitudeNetworkRequests = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    // Use window.performance if available to check existing network requests
+    if (window.performance && window.performance.getEntries) {
+      const resources = window.performance.getEntries();
+      for (const resource of resources) {
+        if (resource.name && typeof resource.name === 'string') {
+          if (resource.name.includes('amplitude.com') || 
+              resource.name.includes('api.amplitude.com') || 
+              resource.name.includes('api2.amplitude.com') || 
+              resource.name.includes('cdn.amplitude.com') ||
+              resource.name.includes('analytics.amplitude.com')) {
+            console.log("Amplitude detected in network requests:", resource.name);
+            resolve(true);
+            return;
+          }
+        }
+      }
+      
+      // If no Amplitude requests found in performance entries, we'll resolve to false
+      resolve(false);
+    } else {
+      // Cannot check network requests, resolve to false
+      resolve(false);
+    }
+  });
 };

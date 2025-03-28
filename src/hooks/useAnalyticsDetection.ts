@@ -6,6 +6,7 @@ import {
   extractGA4Ids,
   extractAdobeIds,
   extractAmplitudeIds,
+  detectAmplitudeNetworkRequests,
   getCurrentTab,
   getTabHTML,
   generateMockAnalyticsData
@@ -57,18 +58,28 @@ export const useAnalyticsDetection = () => {
           const gtmIds = extractGTMIds(html);
           const ga4Ids = extractGA4Ids(html);
           const adobeIds = extractAdobeIds(html);
-          const amplitudeIds = extractAmplitudeIds(html);
+          let amplitudeIds = extractAmplitudeIds(html);
           
           console.log("GTM IDs found:", gtmIds);
           console.log("GA4 IDs found:", ga4Ids);
           console.log("Adobe IDs found:", adobeIds);
           console.log("Amplitude IDs found:", amplitudeIds);
           
+          // Check for Amplitude in the current tab via content script
+          const amplitudeDetectedInNetwork = await checkAmplitudeInBackground();
+          console.log("Amplitude detected in network:", amplitudeDetectedInNetwork);
+          
+          // Set Amplitude as detected if either code detection or network detection is positive
+          const amplitudeDetected = amplitudeIds.length > 0 || amplitudeDetectedInNetwork;
+          
           setAnalyticsData({
             gtm: { detected: gtmIds.length > 0, ids: gtmIds },
             ga4: { detected: ga4Ids.length > 0, ids: ga4Ids },
             adobe: { detected: adobeIds.length > 0, ids: adobeIds },
-            amplitude: { detected: amplitudeIds.length > 0, ids: amplitudeIds },
+            amplitude: { 
+              detected: amplitudeDetected, 
+              ids: amplitudeIds 
+            },
             isLoading: false
           });
           
@@ -93,6 +104,36 @@ export const useAnalyticsDetection = () => {
       toast.error("Error analyzing the page");
     }
   };
+  
+  // Function to check for Amplitude via background script message
+  const checkAmplitudeInBackground = async (): Promise<boolean> => {
+    if (typeof window.chrome !== 'undefined' && window.chrome.runtime && window.chrome.runtime.sendMessage) {
+      try {
+        return new Promise((resolve) => {
+          chrome.runtime.sendMessage(
+            { action: "getDetectedAnalytics" },
+            (response) => {
+              if (chrome.runtime.lastError) {
+                console.error("Error checking Amplitude:", chrome.runtime.lastError);
+                resolve(false);
+                return;
+              }
+              
+              if (response && response.amplitude) {
+                resolve(true);
+              } else {
+                resolve(false);
+              }
+            }
+          );
+        });
+      } catch (error) {
+        console.error("Error sending message to background script:", error);
+        return false;
+      }
+    }
+    return false;
+  };
 
   // Initialize the extension and listen for page changes
   useEffect(() => {
@@ -107,6 +148,15 @@ export const useAnalyticsDetection = () => {
         if (message.action === "pageLoaded") {
           console.log("Page loaded message received, triggering analysis");
           analyzePage();
+        } else if (message.action === "analyticsDetected" && message.tool === "amplitude") {
+          console.log("Amplitude detected message received:", message.detected);
+          setAnalyticsData(prev => ({
+            ...prev,
+            amplitude: {
+              ...prev.amplitude,
+              detected: message.detected
+            }
+          }));
         }
       };
 
