@@ -45,8 +45,8 @@ const AnalyticsCardList: React.FC<AnalyticsCardListProps> = ({ analyticsData }) 
       />
       
       <AnalyticsCard
-        title="Microsoft Clarity"
-        description="Session recording and heatmaps"
+        title="MS Clarity"
+        description="Qualitative analytics"
         isLoading={isLoading}
         detected={clarity.detected}
         ids={clarity.ids}
