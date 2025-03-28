@@ -1,0 +1,31 @@
+
+{
+  "manifest_version": 3,
+  "name": "PH-Analytics-Checker",
+  "version": "1.0.0",
+  "description": "Verificador de scripts de Google Tag Manager y Google Analytics 4",
+  "action": {
+    "default_title": "PH-Analytics-Checker",
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "side_panel": {
+    "default_path": "index.html"
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}

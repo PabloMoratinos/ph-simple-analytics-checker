@@ -21,7 +21,7 @@ interface AnalyticsData {
 }
 
 const AnalyticsChecker: React.FC = () => {
-  const [url, setUrl] = useState('https://example.com');
+  const [url, setUrl] = useState<string>('');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
     gtm: { detected: false, ids: [] },
     ga4: { detected: false, ids: [] },
@@ -39,30 +39,78 @@ const AnalyticsChecker: React.FC = () => {
     return [...new Set(html.match(ga4Regex) || [])];
   };
 
-  const simulatePageScan = () => {
+  const getCurrentTab = async (): Promise<string> => {
+    if (typeof chrome !== 'undefined' && chrome.tabs) {
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        return tab.url || '';
+      } catch (error) {
+        console.error('Error al obtener la pestaña actual:', error);
+        return '';
+      }
+    } else {
+      // Fallback for development environment
+      return window.location.href;
+    }
+  };
+
+  const analyzePage = async (targetUrl: string) => {
     setAnalyticsData(prev => ({ ...prev, isLoading: true }));
     
-    // Simulate API call/page scanning
-    setTimeout(() => {
-      // For demonstration, randomly decide if tags are found
-      const hasGTM = Math.random() > 0.3;
-      const hasGA4 = Math.random() > 0.3;
-      
-      // Create random IDs for demonstration
-      const gtmIds = hasGTM ? Array.from({ length: Math.floor(Math.random() * 2) + 1 }, 
-        (_, i) => `GTM-${Math.random().toString(36).substring(2, 9).toUpperCase()}`) : [];
-      
-      const ga4Ids = hasGA4 ? Array.from({ length: Math.floor(Math.random() * 2) + 1 }, 
-        (_, i) => `G-${Math.random().toString(36).substring(2, 10).toUpperCase()}`) : [];
-      
-      setAnalyticsData({
-        gtm: { detected: hasGTM, ids: gtmIds },
-        ga4: { detected: hasGA4, ids: ga4Ids },
-        isLoading: false
-      });
-      
-      toast.success("Análisis de página completado");
-    }, 2000);
+    try {
+      if (typeof chrome !== 'undefined' && chrome.tabs && chrome.scripting) {
+        // Get the active tab
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        
+        if (!tab.id) {
+          throw new Error('No se pudo obtener el ID de la pestaña');
+        }
+        
+        // Execute script in the tab to get the page HTML
+        const results = await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => document.documentElement.outerHTML
+        });
+        
+        const html = results[0].result as string;
+        
+        // Extract GTM and GA4 IDs
+        const gtmIds = extractGTMIds(html);
+        const ga4Ids = extractGA4Ids(html);
+        
+        setAnalyticsData({
+          gtm: { detected: gtmIds.length > 0, ids: gtmIds },
+          ga4: { detected: ga4Ids.length > 0, ids: ga4Ids },
+          isLoading: false
+        });
+        
+        toast.success("Análisis de página completado");
+      } else {
+        // Fallback for development environment - simulate API call
+        setTimeout(() => {
+          const hasGTM = Math.random() > 0.3;
+          const hasGA4 = Math.random() > 0.3;
+          
+          const gtmIds = hasGTM ? Array.from({ length: Math.floor(Math.random() * 2) + 1 }, 
+            (_, i) => `GTM-${Math.random().toString(36).substring(2, 9).toUpperCase()}`) : [];
+          
+          const ga4Ids = hasGA4 ? Array.from({ length: Math.floor(Math.random() * 2) + 1 }, 
+            (_, i) => `G-${Math.random().toString(36).substring(2, 10).toUpperCase()}`) : [];
+          
+          setAnalyticsData({
+            gtm: { detected: hasGTM, ids: gtmIds },
+            ga4: { detected: hasGA4, ids: ga4Ids },
+            isLoading: false
+          });
+          
+          toast.success("Análisis de página completado (modo simulación)");
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error al analizar la página:', error);
+      setAnalyticsData(prev => ({ ...prev, isLoading: false }));
+      toast.error("Error al analizar la página");
+    }
   };
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,16 +124,26 @@ const AnalyticsChecker: React.FC = () => {
       return;
     }
     
-    simulatePageScan();
+    analyzePage(url);
   };
 
-  const handleRefresh = () => {
-    simulatePageScan();
+  const handleRefresh = async () => {
+    const currentUrl = await getCurrentTab();
+    setUrl(currentUrl);
+    analyzePage(currentUrl);
   };
 
-  // Simulate initial scan
+  // Get current tab URL and analyze it on initial load
   useEffect(() => {
-    simulatePageScan();
+    const initializeExtension = async () => {
+      const currentUrl = await getCurrentTab();
+      setUrl(currentUrl);
+      if (currentUrl) {
+        analyzePage(currentUrl);
+      }
+    };
+    
+    initializeExtension();
   }, []);
 
   return (
@@ -117,7 +175,7 @@ const AnalyticsChecker: React.FC = () => {
           disabled={analyticsData.isLoading}
         >
           <RefreshCwIcon size={16} className={`mr-2 ${analyticsData.isLoading ? 'animate-spin' : ''}`} />
-          Actualizar análisis
+          Analizar página actual
         </Button>
         
         <Separator className="my-4" />
@@ -176,7 +234,7 @@ const AnalyticsChecker: React.FC = () => {
       </div>
       
       <footer className="mt-auto p-4 text-center text-xs text-analytics-gray">
-        <p>Esta aplicación simula una extensión de Chrome. En una extensión real, analizaría el código fuente de la página actual.</p>
+        <p>Esta extensión analiza el código fuente de la página actual para detectar scripts de GTM y GA4.</p>
       </footer>
     </div>
   );

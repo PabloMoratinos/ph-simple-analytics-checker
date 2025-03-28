@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -49,6 +50,20 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Analytics colors */
+    --analytics-blue: 200 85% 45%;
+    --analytics-blue-dark: 200 85% 35%;
+    --analytics-blue-light: 200 85% 95%;
+    --analytics-gray: 210 10% 40%;
+    --analytics-gray-dark: 210 10% 30%;
+    --analytics-gray-light: 210 10% 95%;
+    --analytics-green: 120 60% 50%;
+    --analytics-green-dark: 120 60% 35%;
+    --analytics-green-light: 120 60% 95%;
+    --analytics-red: 0 75% 55%;
+    --analytics-red-dark: 0 75% 45%;
+    --analytics-red-light: 0 75% 95%;
   }
 
   .dark {
@@ -97,5 +112,61 @@
 
   body {
     @apply bg-background text-foreground;
+    width: 100%;
+    min-width: 300px;
+    max-width: 400px;
+    min-height: 400px;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
   }
+}
+
+/* Analytics specific classes */
+.bg-analytics-blue {
+  background-color: hsl(var(--analytics-blue));
+}
+
+.bg-analytics-blue-dark {
+  background-color: hsl(var(--analytics-blue-dark));
+}
+
+.bg-analytics-blue-light {
+  background-color: hsl(var(--analytics-blue-light));
+}
+
+.text-analytics-blue {
+  color: hsl(var(--analytics-blue));
+}
+
+.text-analytics-blue-dark {
+  color: hsl(var(--analytics-blue-dark));
+}
+
+.bg-analytics-gray-light {
+  background-color: hsl(var(--analytics-gray-light));
+}
+
+.text-analytics-gray {
+  color: hsl(var(--analytics-gray));
+}
+
+.text-analytics-gray-dark {
+  color: hsl(var(--analytics-gray-dark));
+}
+
+.bg-analytics-green-light {
+  background-color: hsl(var(--analytics-green-light));
+}
+
+.text-analytics-green-dark {
+  color: hsl(var(--analytics-green-dark));
+}
+
+.bg-analytics-red-light {
+  background-color: hsl(var(--analytics-red-light));
+}
+
+.text-analytics-red-dark {
+  color: hsl(var(--analytics-red-dark));
 }
