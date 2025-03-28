@@ -14,7 +14,10 @@ declare global {
         executeScript: (options: { target: { tabId: number }; func: () => any }) => Promise<any>;
       };
       runtime?: {
-        sendMessage: (message: any) => void;
+        sendMessage: (message: any) => Promise<any>;
+        onInstalled?: {
+          addListener: (callback: () => void) => void;
+        };
         onMessage?: {
           addListener: (callback: (message: any, sender: any, sendResponse: any) => void) => void;
           removeListener: (callback: (message: any, sender: any, sendResponse: any) => void) => void;
@@ -22,6 +25,7 @@ declare global {
       };
       sidePanel?: {
         setPanelBehavior: (options: { openPanelOnActionClick: boolean }) => Promise<void>;
+        open?: () => Promise<void>;
       };
     };
   }

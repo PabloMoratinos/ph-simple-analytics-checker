@@ -13,6 +13,7 @@ const AnalyticsChecker: React.FC = () => {
   const { analyticsData, analyzePage } = useAnalyticsDetection();
 
   const handleRefresh = async () => {
+    console.log("Refresh button clicked");
     toast.info("Actualizando análisis...");
     analyzePage();
   };

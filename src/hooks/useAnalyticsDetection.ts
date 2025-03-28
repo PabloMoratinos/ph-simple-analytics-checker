@@ -48,16 +48,20 @@ export const useAnalyticsDetection = () => {
   };
 
   const analyzePage = async () => {
+    console.log("Starting page analysis...");
     setAnalyticsData(prev => ({ ...prev, isLoading: true }));
     
     try {
       if (typeof window.chrome !== 'undefined' && window.chrome.tabs && window.chrome.scripting) {
+        console.log("Chrome APIs detected, proceeding with extension mode analysis");
         // Get the active tab
         const [tab] = await window.chrome.tabs.query({ active: true, currentWindow: true });
         
         if (!tab.id) {
           throw new Error('No se pudo obtener el ID de la pestaña');
         }
+        
+        console.log("Active tab ID:", tab.id);
         
         // Execute script in the tab to get the page HTML
         const results = await window.chrome.scripting.executeScript({
@@ -66,10 +70,14 @@ export const useAnalyticsDetection = () => {
         });
         
         const html = results[0].result as string;
+        console.log("HTML retrieved, length:", html.length);
         
         // Extract GTM and GA4 IDs
         const gtmIds = extractGTMIds(html);
         const ga4Ids = extractGA4Ids(html);
+        
+        console.log("GTM IDs found:", gtmIds);
+        console.log("GA4 IDs found:", ga4Ids);
         
         setAnalyticsData({
           gtm: { detected: gtmIds.length > 0, ids: gtmIds },
@@ -79,6 +87,7 @@ export const useAnalyticsDetection = () => {
         
         toast.success("Análisis de página completado");
       } else {
+        console.log("Running in development mode, using simulation");
         // Fallback for development environment - simulate API call
         setTimeout(() => {
           const hasGTM = Math.random() > 0.3;
@@ -108,12 +117,16 @@ export const useAnalyticsDetection = () => {
 
   // Initialize the extension and listen for page changes
   useEffect(() => {
+    console.log("AnalyticsDetection hook initialized");
     analyzePage();
 
     // Add listener for runtime messages (from background.js)
     if (typeof window.chrome !== 'undefined' && window.chrome.runtime && window.chrome.runtime.onMessage) {
+      console.log("Setting up Chrome message listener");
       const handleMessage = (message: any) => {
+        console.log("Message received:", message);
         if (message.action === "pageLoaded") {
+          console.log("Page loaded message received, triggering analysis");
           analyzePage();
         }
       };
