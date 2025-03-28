@@ -6,7 +6,6 @@
   "description": "Verificador de scripts de Google Tag Manager y Google Analytics 4",
   "action": {
     "default_title": "PH-Analytics-Checker",
-    "default_popup": "index.html",
     "default_icon": {
       "16": "icon16.png",
       "48": "icon48.png",
@@ -27,5 +26,8 @@
   },
   "host_permissions": [
     "<all_urls>"
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
 }
