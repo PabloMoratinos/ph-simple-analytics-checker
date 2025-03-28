@@ -1,9 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { SearchIcon, RefreshCwIcon } from 'lucide-react';
+import { RefreshCwIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import StatusBadge from './StatusBadge';
 import { toast } from 'sonner';
@@ -20,8 +19,21 @@ interface AnalyticsData {
   isLoading: boolean;
 }
 
+// Define Chrome namespace type to avoid TypeScript errors
+declare global {
+  interface Window {
+    chrome?: {
+      tabs?: {
+        query: (queryInfo: { active: boolean; currentWindow: boolean }) => Promise<any[]>;
+      };
+      scripting?: {
+        executeScript: (options: { target: { tabId: number }; func: () => any }) => Promise<any>;
+      };
+    };
+  }
+}
+
 const AnalyticsChecker: React.FC = () => {
-  const [url, setUrl] = useState<string>('');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
     gtm: { detected: false, ids: [] },
     ga4: { detected: false, ids: [] },
@@ -40,9 +52,9 @@ const AnalyticsChecker: React.FC = () => {
   };
 
   const getCurrentTab = async (): Promise<string> => {
-    if (typeof chrome !== 'undefined' && chrome.tabs) {
+    if (typeof window.chrome !== 'undefined' && window.chrome.tabs) {
       try {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        const [tab] = await window.chrome.tabs.query({ active: true, currentWindow: true });
         return tab.url || '';
       } catch (error) {
         console.error('Error al obtener la pestaña actual:', error);
@@ -54,20 +66,20 @@ const AnalyticsChecker: React.FC = () => {
     }
   };
 
-  const analyzePage = async (targetUrl: string) => {
+  const analyzePage = async () => {
     setAnalyticsData(prev => ({ ...prev, isLoading: true }));
     
     try {
-      if (typeof chrome !== 'undefined' && chrome.tabs && chrome.scripting) {
+      if (typeof window.chrome !== 'undefined' && window.chrome.tabs && window.chrome.scripting) {
         // Get the active tab
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        const [tab] = await window.chrome.tabs.query({ active: true, currentWindow: true });
         
         if (!tab.id) {
           throw new Error('No se pudo obtener el ID de la pestaña');
         }
         
         // Execute script in the tab to get the page HTML
-        const results = await chrome.scripting.executeScript({
+        const results = await window.chrome.scripting.executeScript({
           target: { tabId: tab.id },
           func: () => document.documentElement.outerHTML
         });
@@ -113,37 +125,37 @@ const AnalyticsChecker: React.FC = () => {
     }
   };
 
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUrl(e.target.value);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!url) {
-      toast.error("Por favor, introduce una URL válida");
-      return;
-    }
-    
-    analyzePage(url);
-  };
-
   const handleRefresh = async () => {
-    const currentUrl = await getCurrentTab();
-    setUrl(currentUrl);
-    analyzePage(currentUrl);
+    toast.info("Actualizando análisis...");
+    analyzePage();
   };
 
-  // Get current tab URL and analyze it on initial load
+  // Analyze page on initial load and whenever the tab changes
   useEffect(() => {
     const initializeExtension = async () => {
-      const currentUrl = await getCurrentTab();
-      setUrl(currentUrl);
-      if (currentUrl) {
-        analyzePage(currentUrl);
-      }
+      analyzePage();
     };
     
     initializeExtension();
+
+    // Add listener for tab updates in Chrome extension
+    if (typeof window.chrome !== 'undefined' && window.chrome.tabs) {
+      const handleTabUpdate = (tabId: number, changeInfo: any) => {
+        if (changeInfo.status === 'complete') {
+          analyzePage();
+        }
+      };
+
+      // Try to add the listener
+      try {
+        window.chrome.tabs.onUpdated.addListener(handleTabUpdate);
+        return () => {
+          window.chrome.tabs.onUpdated.removeListener(handleTabUpdate);
+        };
+      } catch (error) {
+        console.error('Error adding tab update listener:', error);
+      }
+    }
   }, []);
 
   return (
@@ -154,20 +166,6 @@ const AnalyticsChecker: React.FC = () => {
       </header>
       
       <div className="p-4">
-        <form onSubmit={handleSubmit} className="flex space-x-2 mb-4">
-          <Input
-            type="url"
-            value={url}
-            onChange={handleUrlChange}
-            placeholder="https://ejemplo.com"
-            className="flex-grow"
-          />
-          <Button type="submit" className="bg-analytics-blue hover:bg-analytics-blue-dark">
-            <SearchIcon size={18} className="mr-1" />
-            Analizar
-          </Button>
-        </form>
-        
         <Button 
           variant="outline" 
           onClick={handleRefresh} 
@@ -175,7 +173,7 @@ const AnalyticsChecker: React.FC = () => {
           disabled={analyticsData.isLoading}
         >
           <RefreshCwIcon size={16} className={`mr-2 ${analyticsData.isLoading ? 'animate-spin' : ''}`} />
-          Analizar página actual
+          Actualizar análisis
         </Button>
         
         <Separator className="my-4" />
