@@ -4,7 +4,7 @@ import { Rocket } from 'lucide-react';
 
 const Header: React.FC = () => {
   return (
-    <header className="bg-analytics-blue text-white p-4 shadow-md">
+    <header className="bg-gradient-header text-white p-4 shadow-md">
       <div className="flex items-center gap-2">
         <div className="flex-shrink-0">
           <Rocket className="h-6 w-6 text-white stroke-current" strokeWidth={2} fill="rgba(255,255,255,0.2)" />
