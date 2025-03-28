@@ -150,22 +150,23 @@ const AnalyticsChecker: React.FC = () => {
     
     initializeExtension();
 
-    // Add listener for tab updates in Chrome extension
-    if (typeof window.chrome !== 'undefined' && window.chrome.tabs && window.chrome.tabs.onUpdated) {
-      const handleTabUpdate = (tabId: number, changeInfo: any) => {
-        if (changeInfo.status === 'complete') {
+    // Add listener for runtime messages (from background.js)
+    if (typeof window.chrome !== 'undefined' && window.chrome.runtime && window.chrome.runtime.onMessage) {
+      const handleMessage = (message: any) => {
+        if (message.action === "pageLoaded") {
           analyzePage();
         }
       };
 
-      // Try to add the listener
       try {
-        window.chrome.tabs.onUpdated.addListener(handleTabUpdate);
+        window.chrome.runtime.onMessage.addListener(handleMessage);
         return () => {
-          window.chrome.tabs.onUpdated.removeListener(handleTabUpdate);
+          if (window.chrome?.runtime?.onMessage) {
+            window.chrome.runtime.onMessage.removeListener(handleMessage);
+          }
         };
       } catch (error) {
-        console.error('Error adding tab update listener:', error);
+        console.error('Error adding message listener:', error);
       }
     }
   }, []);
