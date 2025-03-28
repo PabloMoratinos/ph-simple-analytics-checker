@@ -110,11 +110,11 @@ export const useAnalyticsDetection = () => {
     if (typeof window.chrome !== 'undefined' && window.chrome.runtime && window.chrome.runtime.sendMessage) {
       try {
         return new Promise((resolve) => {
-          chrome.runtime.sendMessage(
+          window.chrome.runtime.sendMessage(
             { action: "getDetectedAnalytics" },
             (response) => {
-              if (chrome.runtime.lastError) {
-                console.error("Error checking Amplitude:", chrome.runtime.lastError);
+              if (window.chrome.runtime.lastError) {
+                console.error("Error checking Amplitude:", window.chrome.runtime.lastError);
                 resolve(false);
                 return;
               }
