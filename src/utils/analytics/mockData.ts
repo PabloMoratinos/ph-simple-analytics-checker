@@ -13,6 +13,7 @@ export const generateMockAnalyticsData = (): AnalyticsData => {
   const hasGA4 = Math.random() > 0.3;
   const hasAdobe = Math.random() > 0.3;
   const hasAmplitude = Math.random() > 0.3;
+  const hasClarity = Math.random() > 0.3;
   
   const gtmIds = hasGTM ? Array.from({ length: Math.floor(Math.random() * 2) + 1 }, 
     (_, i) => `GTM-${Math.random().toString(36).substring(2, 9).toUpperCase()}`) : [];
@@ -26,11 +27,15 @@ export const generateMockAnalyticsData = (): AnalyticsData => {
   const amplitudeIds = hasAmplitude ? Array.from({ length: Math.floor(Math.random() * 2) + 1 }, 
     (_, i) => `${Array.from({ length: 32 }, () => Math.random().toString(36)[2]).join('').toUpperCase()}`) : [];
   
+  const clarityIds = hasClarity ? Array.from({ length: Math.floor(Math.random() * 2) + 1 }, 
+    (_, i) => `${Math.random().toString(36).substring(2, 10).toUpperCase()}`) : [];
+  
   return {
     gtm: { detected: hasGTM, ids: gtmIds },
     ga4: { detected: hasGA4, ids: ga4Ids },
     adobe: { detected: hasAdobe, ids: adobeIds },
     amplitude: { detected: hasAmplitude, ids: amplitudeIds },
+    clarity: { detected: hasClarity, ids: clarityIds },
     isLoading: false
   };
 };

@@ -6,7 +6,9 @@ import {
   extractGA4Ids,
   extractAdobeIds,
   extractAmplitudeIds,
+  extractClarityIds,
   detectAmplitudeNetworkRequests,
+  detectClarityNetworkRequests,
   getCurrentTab,
   getTabHTML,
   generateMockAnalyticsData
@@ -29,6 +31,10 @@ export interface AnalyticsData {
     detected: boolean;
     ids: string[];
   };
+  clarity: {
+    detected: boolean;
+    ids: string[];
+  };
   isLoading: boolean;
 }
 
@@ -38,6 +44,7 @@ export const useAnalyticsDetection = () => {
     ga4: { detected: false, ids: [] },
     adobe: { detected: false, ids: [] },
     amplitude: { detected: false, ids: [] },
+    clarity: { detected: false, ids: [] },
     isLoading: false
   });
 
@@ -59,18 +66,25 @@ export const useAnalyticsDetection = () => {
           const ga4Ids = extractGA4Ids(html);
           const adobeIds = extractAdobeIds(html);
           let amplitudeIds = extractAmplitudeIds(html);
+          let clarityIds = extractClarityIds(html);
           
           console.log("GTM IDs found:", gtmIds);
           console.log("GA4 IDs found:", ga4Ids);
           console.log("Adobe IDs found:", adobeIds);
           console.log("Amplitude IDs found:", amplitudeIds);
+          console.log("Clarity IDs found:", clarityIds);
           
           // Check for Amplitude in the current tab via content script
           const amplitudeDetectedInNetwork = await checkAmplitudeInBackground();
           console.log("Amplitude detected in network:", amplitudeDetectedInNetwork);
           
+          // Check for Clarity in the current tab via content script
+          const clarityDetectedInNetwork = await checkClarityInBackground();
+          console.log("Clarity detected in network:", clarityDetectedInNetwork);
+          
           // Set Amplitude as detected if either code detection or network detection is positive
           const amplitudeDetected = amplitudeIds.length > 0 || amplitudeDetectedInNetwork;
+          const clarityDetected = clarityIds.length > 0 || clarityDetectedInNetwork;
           
           setAnalyticsData({
             gtm: { detected: gtmIds.length > 0, ids: gtmIds },
@@ -79,6 +93,10 @@ export const useAnalyticsDetection = () => {
             amplitude: { 
               detected: amplitudeDetected, 
               ids: amplitudeIds 
+            },
+            clarity: {
+              detected: clarityDetected,
+              ids: clarityIds
             },
             isLoading: false
           });
@@ -137,6 +155,43 @@ export const useAnalyticsDetection = () => {
         });
       } catch (error) {
         console.error("Error in checkAmplitudeInBackground:", error);
+        return false;
+      }
+    }
+    return false;
+  };
+
+  // Function to check for Clarity via background script message
+  const checkClarityInBackground = async (): Promise<boolean> => {
+    if (typeof window.chrome !== 'undefined' && window.chrome.runtime && window.chrome.runtime.sendMessage) {
+      try {
+        // Use Promise to handle the async message response
+        return new Promise((resolve) => {
+          // Create message handler function
+          const messageHandler = (response: any) => {
+            console.log("Received Clarity response from background:", response);
+            if (response && response.clarity) {
+              resolve(true);
+            } else {
+              resolve(false);
+            }
+          };
+
+          // Send message to background script
+          try {
+            window.chrome.runtime.sendMessage({ action: "getDetectedAnalytics" })
+              .then(messageHandler)
+              .catch(error => {
+                console.error("Error in Clarity sendMessage:", error);
+                resolve(false);
+              });
+          } catch (error) {
+            console.error("Exception sending message to background script for Clarity:", error);
+            resolve(false);
+          }
+        });
+      } catch (error) {
+        console.error("Error in checkClarityInBackground:", error);
         return false;
       }
     }

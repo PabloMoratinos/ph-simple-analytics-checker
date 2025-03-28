@@ -8,7 +8,7 @@ interface AnalyticsCardListProps {
 }
 
 const AnalyticsCardList: React.FC<AnalyticsCardListProps> = ({ analyticsData }) => {
-  const { gtm, ga4, adobe, amplitude, isLoading } = analyticsData;
+  const { gtm, ga4, adobe, amplitude, clarity, isLoading } = analyticsData;
   
   return (
     <div className="space-y-3">
@@ -42,6 +42,14 @@ const AnalyticsCardList: React.FC<AnalyticsCardListProps> = ({ analyticsData }) 
         isLoading={isLoading}
         detected={amplitude.detected}
         ids={amplitude.ids}
+      />
+      
+      <AnalyticsCard
+        title="Microsoft Clarity"
+        description="Session recording and heatmaps"
+        isLoading={isLoading}
+        detected={clarity.detected}
+        ids={clarity.ids}
       />
     </div>
   );

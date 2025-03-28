@@ -6,7 +6,8 @@ chrome.sidePanel
 
 // Store detected analytics tools
 let detectedAnalytics = {
-  amplitude: false
+  amplitude: false,
+  clarity: false
 };
 
 // Listen for tab updates to refresh the side panel
@@ -33,10 +34,26 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         }).catch(err => console.log("Error sending analytics detection message:", err));
       }
     }).catch(err => console.log("Error executing script for Amplitude detection:", err));
+
+    // Execute a content script to detect Clarity via network requests
+    chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      function: checkForClarityNetwork,
+    }).then((results) => {
+      if (results && results[0] && results[0].result) {
+        detectedAnalytics.clarity = results[0].result;
+        // Notify the extension about the detected analytics
+        chrome.runtime.sendMessage({
+          action: "analyticsDetected",
+          tool: "clarity",
+          detected: true
+        }).catch(err => console.log("Error sending Clarity detection message:", err));
+      }
+    }).catch(err => console.log("Error executing script for Clarity detection:", err));
   }
 });
 
-// Function to be injected as a content script
+// Function to be injected as a content script for Amplitude detection
 function checkForAmplitudeNetwork() {
   // Look for Amplitude domains in network requests
   const amplitudeDetected = checkNetworkRequestsForAmplitude();
@@ -67,6 +84,42 @@ function checkForAmplitudeNetwork() {
         window.$amplitude || 
         window.AmplitudeClient) {
       console.log("Amplitude object detected in global namespace");
+      return true;
+    }
+
+    return false;
+  }
+}
+
+// Function to be injected as a content script for Clarity detection
+function checkForClarityNetwork() {
+  // Look for Clarity domains in network requests
+  const clarityDetected = checkNetworkRequestsForClarity();
+  return clarityDetected;
+
+  // Helper function to check network requests for Clarity domains
+  function checkNetworkRequestsForClarity() {
+    // Check performance entries if available
+    if (window.performance && window.performance.getEntries) {
+      const resources = window.performance.getEntries();
+      for (const resource of resources) {
+        if (resource.name && typeof resource.name === 'string') {
+          if (resource.name.includes('clarity.ms') || 
+              resource.name.includes('clarity.microsoft.com') || 
+              resource.name.includes('c.clarity.ms') || 
+              resource.name.includes('www.clarity.ms')) {
+            console.log("Microsoft Clarity detected in network requests:", resource.name);
+            return true;
+          }
+        }
+      }
+    }
+
+    // Check for Clarity objects in the global namespace
+    if (window.clarity || 
+        window.Clarity || 
+        window.Microsoft?.clarity) {
+      console.log("Clarity object detected in global namespace");
       return true;
     }
 
