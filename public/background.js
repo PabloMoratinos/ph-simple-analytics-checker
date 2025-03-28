@@ -93,22 +93,31 @@ function checkForAmplitudeNetwork() {
 
 // Function to be injected as a content script for Clarity detection
 function checkForClarityNetwork() {
-  // Look for Clarity domains in network requests
+  // Look for Clarity domains in network requests and global objects
   const clarityDetected = checkNetworkRequestsForClarity();
   return clarityDetected;
 
   // Helper function to check network requests for Clarity domains
   function checkNetworkRequestsForClarity() {
+    // Check for any clarity.js script elements in the document
+    const clarityScripts = document.querySelectorAll('script[src*="clarity.js"]');
+    if (clarityScripts.length > 0) {
+      console.log("Clarity script tag detected in document");
+      return true;
+    }
+    
     // Check performance entries if available
     if (window.performance && window.performance.getEntries) {
       const resources = window.performance.getEntries();
       for (const resource of resources) {
         if (resource.name && typeof resource.name === 'string') {
-          if (resource.name.includes('clarity.ms') || 
-              resource.name.includes('d.clarity.ms') ||
-              resource.name.includes('clarity.microsoft.com') || 
-              resource.name.includes('c.clarity.ms') || 
-              resource.name.includes('www.clarity.ms')) {
+          const url = resource.name.toLowerCase();
+          if (url.includes('clarity.ms') || 
+              url.includes('d.clarity.ms') ||
+              url.includes('clarity.microsoft.com') || 
+              url.includes('c.clarity.ms') || 
+              url.includes('www.clarity.ms') ||
+              url.includes('clarity.js')) {
             console.log("Microsoft Clarity detected in network requests:", resource.name);
             return true;
           }
