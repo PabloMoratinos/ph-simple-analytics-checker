@@ -9,7 +9,7 @@ const Header: React.FC = () => {
           <img 
             src="/lovable-uploads/e132bbd1-f449-4d28-954c-87666f19b393.png" 
             alt="Product Hackers Logo" 
-            className="h-6 w-6"
+            className="h-6 w-auto object-contain" 
           />
         </div>
         <h1 className="text-xl font-bold">PH Simple Analytics Checker</h1>
