@@ -7,7 +7,7 @@ const Header: React.FC = () => {
     <header className="bg-analytics-blue text-white p-4 shadow-md">
       <div className="flex items-center gap-2">
         <div className="flex-shrink-0">
-          <Rocket className="h-6 w-6 text-white stroke-current" strokeWidth={2} />
+          <Rocket className="h-6 w-6 text-white stroke-current" strokeWidth={2} fill="rgba(255,255,255,0.2)" />
         </div>
         <h1 className="text-xl font-bold">PH Simple Analytics Checker</h1>
       </div>
