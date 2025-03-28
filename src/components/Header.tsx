@@ -1,13 +1,16 @@
 
 import React from 'react';
-import { Rocket } from 'lucide-react';
 
 const Header: React.FC = () => {
   return (
     <header className="bg-gradient-header text-white p-4 shadow-md">
       <div className="flex items-center gap-2">
         <div className="flex-shrink-0">
-          <Rocket className="h-6 w-6 text-white stroke-current" strokeWidth={2} fill="rgba(255,255,255,0.2)" />
+          <img 
+            src="/lovable-uploads/e132bbd1-f449-4d28-954c-87666f19b393.png" 
+            alt="Product Hackers Logo" 
+            className="h-6 w-6"
+          />
         </div>
         <h1 className="text-xl font-bold">PH Simple Analytics Checker</h1>
       </div>
