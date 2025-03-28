@@ -19,15 +19,27 @@ interface AnalyticsData {
   isLoading: boolean;
 }
 
-// Define Chrome namespace type to avoid TypeScript errors
+// Expanded Chrome namespace type definition to include onUpdated listener
 declare global {
   interface Window {
     chrome?: {
       tabs?: {
         query: (queryInfo: { active: boolean; currentWindow: boolean }) => Promise<any[]>;
+        // Add the onUpdated event listener to the type definition
+        onUpdated?: {
+          addListener: (callback: (tabId: number, changeInfo: any, tab: any) => void) => void;
+          removeListener: (callback: (tabId: number, changeInfo: any, tab: any) => void) => void;
+        };
       };
       scripting?: {
         executeScript: (options: { target: { tabId: number }; func: () => any }) => Promise<any>;
+      };
+      runtime?: {
+        sendMessage: (message: any) => void;
+        onMessage?: {
+          addListener: (callback: (message: any, sender: any, sendResponse: any) => void) => void;
+          removeListener: (callback: (message: any, sender: any, sendResponse: any) => void) => void;
+        };
       };
     };
   }
@@ -139,7 +151,7 @@ const AnalyticsChecker: React.FC = () => {
     initializeExtension();
 
     // Add listener for tab updates in Chrome extension
-    if (typeof window.chrome !== 'undefined' && window.chrome.tabs) {
+    if (typeof window.chrome !== 'undefined' && window.chrome.tabs && window.chrome.tabs.onUpdated) {
       const handleTabUpdate = (tabId: number, changeInfo: any) => {
         if (changeInfo.status === 'complete') {
           analyzePage();

@@ -1,4 +1,5 @@
 
+// Configure the side panel to open when the extension action is clicked
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
   .catch((error) => console.error(error));
@@ -6,7 +7,10 @@ chrome.sidePanel
 // Listen for tab updates to refresh the side panel
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete') {
-    // Refresh the side panel content when a page is loaded
-    chrome.runtime.sendMessage({ action: "pageLoaded", tabId: tabId });
+    // Send a message to the extension that the page was loaded
+    chrome.runtime.sendMessage({ 
+      action: "pageLoaded", 
+      tabId: tabId 
+    }).catch(err => console.log("Error sending message:", err));
   }
 });
