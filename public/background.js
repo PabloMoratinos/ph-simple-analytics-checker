@@ -105,6 +105,7 @@ function checkForClarityNetwork() {
       for (const resource of resources) {
         if (resource.name && typeof resource.name === 'string') {
           if (resource.name.includes('clarity.ms') || 
+              resource.name.includes('d.clarity.ms') ||
               resource.name.includes('clarity.microsoft.com') || 
               resource.name.includes('c.clarity.ms') || 
               resource.name.includes('www.clarity.ms')) {

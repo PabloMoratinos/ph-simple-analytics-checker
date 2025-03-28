@@ -8,14 +8,15 @@ interface AnalyticsSummaryProps {
 }
 
 const AnalyticsSummary: React.FC<AnalyticsSummaryProps> = ({ analyticsData }) => {
-  const { gtm, ga4, adobe, amplitude, isLoading } = analyticsData;
+  const { gtm, ga4, adobe, amplitude, clarity, isLoading } = analyticsData;
   
   // Count detected tools
   const detectedCount = [
     gtm.detected,
     ga4.detected,
     adobe.detected,
-    amplitude.detected
+    amplitude.detected,
+    clarity.detected
   ].filter(Boolean).length;
   
   // Skip rendering if still loading

@@ -211,15 +211,26 @@ export const useAnalyticsDetection = () => {
         if (message.action === "pageLoaded") {
           console.log("Page loaded message received, triggering analysis");
           analyzePage();
-        } else if (message.action === "analyticsDetected" && message.tool === "amplitude") {
-          console.log("Amplitude detected message received:", message.detected);
-          setAnalyticsData(prev => ({
-            ...prev,
-            amplitude: {
-              ...prev.amplitude,
-              detected: message.detected
-            }
-          }));
+        } else if (message.action === "analyticsDetected") {
+          if (message.tool === "amplitude") {
+            console.log("Amplitude detected message received:", message.detected);
+            setAnalyticsData(prev => ({
+              ...prev,
+              amplitude: {
+                ...prev.amplitude,
+                detected: message.detected
+              }
+            }));
+          } else if (message.tool === "clarity") {
+            console.log("Clarity detected message received:", message.detected);
+            setAnalyticsData(prev => ({
+              ...prev,
+              clarity: {
+                ...prev.clarity,
+                detected: message.detected
+              }
+            }));
+          }
         }
       };
 
