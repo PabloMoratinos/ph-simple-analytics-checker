@@ -109,26 +109,34 @@ export const useAnalyticsDetection = () => {
   const checkAmplitudeInBackground = async (): Promise<boolean> => {
     if (typeof window.chrome !== 'undefined' && window.chrome.runtime && window.chrome.runtime.sendMessage) {
       try {
+        // Use Promise to handle the async message response
         return new Promise((resolve) => {
-          window.chrome.runtime.sendMessage(
-            { action: "getDetectedAnalytics" },
-            (response) => {
-              if (window.chrome.runtime.lastError) {
-                console.error("Error checking Amplitude:", window.chrome.runtime.lastError);
-                resolve(false);
-                return;
-              }
-              
-              if (response && response.amplitude) {
-                resolve(true);
-              } else {
-                resolve(false);
-              }
+          // Create message handler function
+          const messageHandler = (response: any) => {
+            console.log("Received response from background:", response);
+            if (response && response.amplitude) {
+              resolve(true);
+            } else {
+              resolve(false);
             }
-          );
+          };
+
+          // Send message to background script
+          // Note: Using a try/catch to handle potential errors with sendMessage
+          try {
+            window.chrome.runtime.sendMessage({ action: "getDetectedAnalytics" })
+              .then(messageHandler)
+              .catch(error => {
+                console.error("Error in sendMessage:", error);
+                resolve(false);
+              });
+          } catch (error) {
+            console.error("Exception sending message to background script:", error);
+            resolve(false);
+          }
         });
       } catch (error) {
-        console.error("Error sending message to background script:", error);
+        console.error("Error in checkAmplitudeInBackground:", error);
         return false;
       }
     }
