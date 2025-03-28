@@ -12,7 +12,7 @@ const DetectedIds: React.FC<DetectedIdsProps> = ({ ids }) => {
   
   return (
     <div className="mt-3 animate-fade-in">
-      <p className="text-sm font-medium text-analytics-gray-dark mb-2">IDs detectados:</p>
+      <p className="text-sm font-medium text-analytics-gray-dark mb-2">Detected IDs:</p>
       <Table>
         <TableBody>
           {ids.map(id => (

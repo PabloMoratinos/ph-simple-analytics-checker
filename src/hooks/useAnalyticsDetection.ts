@@ -72,11 +72,11 @@ export const useAnalyticsDetection = () => {
             isLoading: false
           });
           
-          toast.success("Análisis de página completado");
+          toast.success("Page analysis completed");
         } catch (error) {
           console.error("Error during tab analysis:", error);
           setAnalyticsData(prev => ({ ...prev, isLoading: false }));
-          toast.error("Error al analizar la página");
+          toast.error("Error analyzing the page");
         }
       } else {
         console.log("Running in development mode, using simulation");
@@ -84,13 +84,13 @@ export const useAnalyticsDetection = () => {
         setTimeout(() => {
           const mockData = generateMockAnalyticsData();
           setAnalyticsData(mockData);
-          toast.success("Análisis de página completado (modo simulación)");
+          toast.success("Page analysis completed (simulation mode)");
         }, 2000);
       }
     } catch (error) {
-      console.error('Error al analizar la página:', error);
+      console.error('Error analyzing the page:', error);
       setAnalyticsData(prev => ({ ...prev, isLoading: false }));
-      toast.error("Error al analizar la página");
+      toast.error("Error analyzing the page");
     }
   };
 

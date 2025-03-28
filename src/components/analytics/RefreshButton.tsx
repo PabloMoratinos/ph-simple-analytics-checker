@@ -34,7 +34,7 @@ const RefreshButton: React.FC<RefreshButtonProps> = ({
           isLoading && "animate-spin" 
         )} 
       />
-      {isLoading ? "Analizando..." : "Actualizar análisis"}
+      {isLoading ? "Analyzing..." : "Refresh analysis"}
     </Button>
   );
 };

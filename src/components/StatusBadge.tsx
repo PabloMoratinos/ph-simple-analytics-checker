@@ -18,28 +18,28 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className }) => {
           bgColor: 'bg-analytics-green-light',
           textColor: 'text-analytics-green-dark',
           icon: <CheckCircle className="w-4 h-4 mr-1" />,
-          label: 'Detectado'
+          label: 'Detected'
         };
       case 'not-detected':
         return {
           bgColor: 'bg-analytics-red-light',
           textColor: 'text-analytics-red-dark',
           icon: <XCircle className="w-4 h-4 mr-1" />,
-          label: 'No detectado'
+          label: 'Not detected'
         };
       case 'loading':
         return {
           bgColor: 'bg-analytics-gray-light',
           textColor: 'text-analytics-gray-dark',
           icon: <Loader2 className="w-4 h-4 mr-1 animate-spin" />,
-          label: 'Analizando...'
+          label: 'Analyzing...'
         };
       default:
         return {
           bgColor: 'bg-analytics-gray-light',
           textColor: 'text-analytics-gray-dark',
           icon: null,
-          label: 'Desconocido'
+          label: 'Unknown'
         };
     }
   };

@@ -9,7 +9,7 @@ const Header: React.FC = () => {
         <Rocket className="h-6 w-6 text-white" />
         <h1 className="text-xl font-bold">PH Simple Analytics Checker</h1>
       </div>
-      <p className="text-sm opacity-80">Verifique los scripts de analítica en cualquier página web</p>
+      <p className="text-sm opacity-80">Check analytics scripts on any web page</p>
     </header>
   );
 };

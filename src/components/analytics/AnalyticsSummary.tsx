@@ -25,20 +25,20 @@ const AnalyticsSummary: React.FC<AnalyticsSummaryProps> = ({ analyticsData }) =>
   
   return (
     <div className="mb-4 p-4 bg-white rounded-lg shadow-sm border border-gray-100">
-      <h2 className="text-sm font-medium text-analytics-gray-dark mb-2">Resumen del análisis</h2>
+      <h2 className="text-sm font-medium text-analytics-gray-dark mb-2">Analysis Summary</h2>
       
       {detectedCount > 0 ? (
         <div className="flex items-center text-analytics-green-dark">
           <CircleCheck className="w-4 h-4 mr-2" />
           <p className="text-sm">
-            Se detectaron <span className="font-medium">{detectedCount}</span> herramientas de analítica en esta página
+            <span className="font-medium">{detectedCount}</span> analytics tools detected on this page
           </p>
         </div>
       ) : (
         <div className="flex items-center text-analytics-gray">
           <CircleX className="w-4 h-4 mr-2" />
           <p className="text-sm">
-            No se detectaron herramientas de analítica en esta página
+            No analytics tools detected on this page
           </p>
         </div>
       )}

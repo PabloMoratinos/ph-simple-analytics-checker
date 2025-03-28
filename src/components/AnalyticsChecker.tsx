@@ -14,14 +14,14 @@ const AnalyticsChecker: React.FC = () => {
 
   const handleRefresh = async () => {
     console.log("Refresh button clicked");
-    toast.info("Actualizando análisis...");
+    toast.info("Updating analysis...");
     analyzePage();
   };
 
   // Show success toast when analysis completes
   useEffect(() => {
     if (!analyticsData.isLoading && analyticsData.gtm.ids.length > 0) {
-      toast.success("Análisis completado");
+      toast.success("Analysis completed");
     }
   }, [analyticsData.isLoading, analyticsData.gtm.ids.length]);
 

@@ -50,7 +50,7 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({
       {detected && (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <CollapsibleTrigger className="w-full text-left flex items-center justify-between text-xs text-analytics-blue mt-2 hover:underline">
-            <span>{isOpen ? 'Ocultar detalles' : 'Mostrar detalles'}</span>
+            <span>{isOpen ? 'Hide details' : 'Show details'}</span>
             {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </CollapsibleTrigger>
           <CollapsibleContent>
