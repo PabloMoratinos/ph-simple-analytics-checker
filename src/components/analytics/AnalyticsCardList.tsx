@@ -14,7 +14,7 @@ const AnalyticsCardList: React.FC<AnalyticsCardListProps> = ({ analyticsData }) 
     <div className="space-y-3">
       <AnalyticsCard
         title="Google Tag Manager"
-        description="Contenedor de etiquetas"
+        description="Tag container"
         isLoading={isLoading}
         detected={gtm.detected}
         ids={gtm.ids}
@@ -22,7 +22,7 @@ const AnalyticsCardList: React.FC<AnalyticsCardListProps> = ({ analyticsData }) 
       
       <AnalyticsCard
         title="Google Analytics 4"
-        description="Medición y análisis"
+        description="Measurement and analysis"
         isLoading={isLoading}
         detected={ga4.detected}
         ids={ga4.ids}
@@ -30,7 +30,7 @@ const AnalyticsCardList: React.FC<AnalyticsCardListProps> = ({ analyticsData }) 
       
       <AnalyticsCard
         title="Adobe Analytics"
-        description="Seguimiento y análisis web"
+        description="Web tracking and analytics"
         isLoading={isLoading}
         detected={adobe.detected}
         ids={adobe.ids}
@@ -38,7 +38,7 @@ const AnalyticsCardList: React.FC<AnalyticsCardListProps> = ({ analyticsData }) 
       
       <AnalyticsCard
         title="Amplitude"
-        description="Analítica de comportamiento"
+        description="Behavioral analytics"
         isLoading={isLoading}
         detected={amplitude.detected}
         ids={amplitude.ids}
