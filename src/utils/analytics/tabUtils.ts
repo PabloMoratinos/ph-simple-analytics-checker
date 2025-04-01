@@ -4,12 +4,18 @@
  */
 
 /**
- * Checks if a URL is a chrome:// URL
+ * Checks if a URL is a chrome:// URL or other restricted URL
  * @param url - The URL to check
- * @returns Boolean indicating if it's a chrome URL
+ * @returns Boolean indicating if it's a restricted URL
  */
 export const isChromeUrl = (url: string): boolean => {
-  return url.startsWith('chrome://');
+  // Check for common restricted URL patterns
+  return url.startsWith('chrome://') || 
+         url.startsWith('chrome-extension://') ||
+         url.startsWith('devtools://') ||
+         url.startsWith('edge://') ||  // For Microsoft Edge
+         url.startsWith('about:') ||   // For about: pages
+         url.startsWith('chrome-search://');
 };
 
 /**
@@ -45,10 +51,10 @@ export const getTabHTML = async (): Promise<string> => {
         throw new Error('No se pudo obtener el ID de la pestaña');
       }
       
-      // Skip chrome:// URLs
+      // Check if the URL is restricted before attempting to access its content
       if (tab.url && isChromeUrl(tab.url)) {
-        console.log("Skipping HTML retrieval for chrome:// URL:", tab.url);
-        return '';
+        console.log("Skipping HTML retrieval for restricted URL:", tab.url);
+        throw new Error("Cannot access a restricted URL");
       }
       
       // Execute script in the tab to get the page HTML

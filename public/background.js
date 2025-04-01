@@ -10,17 +10,35 @@ let detectedAnalytics = {
   clarity: false
 };
 
-// Check if URL is a chrome:// URL
+// Check if URL is a restricted URL (chrome://, etc)
 function isChromeUrl(url) {
-  return url.startsWith('chrome://');
+  return url.startsWith('chrome://') || 
+         url.startsWith('chrome-extension://') ||
+         url.startsWith('devtools://') ||
+         url.startsWith('edge://') ||
+         url.startsWith('about:') ||
+         url.startsWith('chrome-search://');
 }
 
 // Listen for tab updates to refresh the side panel
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete') {
-    // Skip chrome:// URLs
+    // Skip restricted URLs
     if (tab.url && isChromeUrl(tab.url)) {
-      console.log("Skipping analytics detection on chrome:// URL:", tab.url);
+      console.log("Skipping analytics detection on restricted URL:", tab.url);
+      
+      // Reset analytics data for restricted URLs
+      detectedAnalytics = {
+        amplitude: false,
+        clarity: false
+      };
+      
+      // Notify the extension that we're on a restricted URL
+      chrome.runtime.sendMessage({ 
+        action: "restrictedUrl", 
+        url: tab.url
+      }).catch(err => console.log("Error sending restricted URL message:", err));
+      
       return;
     }
 
@@ -31,36 +49,44 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     }).catch(err => console.log("Error sending message:", err));
 
     // Execute a content script to detect Amplitude via network requests
-    chrome.scripting.executeScript({
-      target: { tabId: tabId },
-      function: checkForAmplitudeNetwork,
-    }).then((results) => {
-      if (results && results[0] && results[0].result) {
-        detectedAnalytics.amplitude = results[0].result;
-        // Notify the extension about the detected analytics
-        chrome.runtime.sendMessage({
-          action: "analyticsDetected",
-          tool: "amplitude",
-          detected: true
-        }).catch(err => console.log("Error sending analytics detection message:", err));
-      }
-    }).catch(err => console.log("Error executing script for Amplitude detection:", err));
+    try {
+      chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        function: checkForAmplitudeNetwork,
+      }).then((results) => {
+        if (results && results[0] && results[0].result) {
+          detectedAnalytics.amplitude = results[0].result;
+          // Notify the extension about the detected analytics
+          chrome.runtime.sendMessage({
+            action: "analyticsDetected",
+            tool: "amplitude",
+            detected: true
+          }).catch(err => console.log("Error sending analytics detection message:", err));
+        }
+      }).catch(err => console.log("Error executing script for Amplitude detection:", err));
+    } catch (err) {
+      console.log("Exception during Amplitude detection:", err);
+    }
 
     // Execute a content script to detect Clarity via network requests
-    chrome.scripting.executeScript({
-      target: { tabId: tabId },
-      function: checkForClarityNetwork,
-    }).then((results) => {
-      if (results && results[0] && results[0].result) {
-        detectedAnalytics.clarity = results[0].result;
-        // Notify the extension about the detected analytics
-        chrome.runtime.sendMessage({
-          action: "analyticsDetected",
-          tool: "clarity",
-          detected: true
-        }).catch(err => console.log("Error sending Clarity detection message:", err));
-      }
-    }).catch(err => console.log("Error executing script for Clarity detection:", err));
+    try {
+      chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        function: checkForClarityNetwork,
+      }).then((results) => {
+        if (results && results[0] && results[0].result) {
+          detectedAnalytics.clarity = results[0].result;
+          // Notify the extension about the detected analytics
+          chrome.runtime.sendMessage({
+            action: "analyticsDetected",
+            tool: "clarity",
+            detected: true
+          }).catch(err => console.log("Error sending Clarity detection message:", err));
+        }
+      }).catch(err => console.log("Error executing script for Clarity detection:", err));
+    } catch (err) {
+      console.log("Exception during Clarity detection:", err);
+    }
   }
 });
 
