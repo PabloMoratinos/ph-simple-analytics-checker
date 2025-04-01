@@ -10,9 +10,20 @@ let detectedAnalytics = {
   clarity: false
 };
 
+// Check if URL is a chrome:// URL
+function isChromeUrl(url) {
+  return url.startsWith('chrome://');
+}
+
 // Listen for tab updates to refresh the side panel
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete') {
+    // Skip chrome:// URLs
+    if (tab.url && isChromeUrl(tab.url)) {
+      console.log("Skipping analytics detection on chrome:// URL:", tab.url);
+      return;
+    }
+
     // Send a message to the extension that the page was loaded
     chrome.runtime.sendMessage({ 
       action: "pageLoaded", 

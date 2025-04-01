@@ -11,6 +11,7 @@ import {
   detectClarityNetworkRequests,
   getCurrentTab,
   getTabHTML,
+  isChromeUrl,
   generateMockAnalyticsData
 } from '@/utils/analytics';
 
@@ -57,6 +58,18 @@ export const useAnalyticsDetection = () => {
         console.log("Chrome APIs detected, proceeding with extension mode analysis");
         
         try {
+          // Check if current tab is a chrome:// URL
+          const url = await getCurrentTab();
+          if (isChromeUrl(url)) {
+            console.log("Skipping analysis for chrome:// URL:", url);
+            setAnalyticsData(prev => ({ 
+              ...prev, 
+              isLoading: false 
+            }));
+            toast.info("Analysis not available on chrome:// URLs");
+            return;
+          }
+          
           // Get HTML content from the current tab
           const html = await getTabHTML();
           console.log("HTML retrieved, length:", html.length);

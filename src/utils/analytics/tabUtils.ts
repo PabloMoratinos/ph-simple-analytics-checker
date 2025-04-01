@@ -4,6 +4,15 @@
  */
 
 /**
+ * Checks if a URL is a chrome:// URL
+ * @param url - The URL to check
+ * @returns Boolean indicating if it's a chrome URL
+ */
+export const isChromeUrl = (url: string): boolean => {
+  return url.startsWith('chrome://');
+};
+
+/**
  * Gets the URL of the current active tab
  * @returns Promise with the current tab URL
  */
@@ -34,6 +43,12 @@ export const getTabHTML = async (): Promise<string> => {
       
       if (!tab.id) {
         throw new Error('No se pudo obtener el ID de la pestaña');
+      }
+      
+      // Skip chrome:// URLs
+      if (tab.url && isChromeUrl(tab.url)) {
+        console.log("Skipping HTML retrieval for chrome:// URL:", tab.url);
+        return '';
       }
       
       // Execute script in the tab to get the page HTML
