@@ -9,6 +9,6 @@
  * @returns Array of detected GTM IDs
  */
 export const extractGTMIds = (html: string): string[] => {
-  const gtmRegex = /GTM-[A-Z0-9]{1,7}/g;
+  const gtmRegex = /GTM-[A-Z0-9]{1,8}/g;
   return [...new Set(html.match(gtmRegex) || [])];
 };
