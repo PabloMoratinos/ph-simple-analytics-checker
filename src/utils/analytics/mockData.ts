@@ -36,6 +36,8 @@ export const generateMockAnalyticsData = (): AnalyticsData => {
     adobe: { detected: hasAdobe, ids: adobeIds },
     amplitude: { detected: hasAmplitude, ids: amplitudeIds },
     clarity: { detected: hasClarity, ids: clarityIds },
-    isLoading: false
+    isLoading: false,
+    isRestrictedUrl: false,
+    currentUrl: 'https://example.com'
   };
 };
