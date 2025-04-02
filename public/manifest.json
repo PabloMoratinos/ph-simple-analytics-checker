@@ -3,7 +3,7 @@
   "manifest_version": 3,
   "name": "PH Simple Analytics Checker",
   "version": "1.0.0",
-  "description": "Checker for Google Tag Manager, Google Analytics 4, Adobe Analytics and Amplitude scripts",
+  "description": "Very simple checker for Google Tag Manager, Google Analytics 4, Adobe Analytics, Amplitude and Clarity scripts",
   "action": {
     "default_title": "PH Simple Analytics Checker",
     "default_icon": {
